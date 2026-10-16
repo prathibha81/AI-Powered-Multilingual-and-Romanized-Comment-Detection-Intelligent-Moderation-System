@@ -1,0 +1,21 @@
+kind = "api"
+previewPath = "/api"
+title = "API Server"
+version = "1.0.0"
+id = "3B4_FFSkEVBkAeYMFRJ2e"
+
+[[services]]
+localPort = 5000
+name = "Flask App"
+paths = ["/"]
+
+[services.development]
+run = "python ../../app.py"
+
+[services.production]
+
+[services.production.run]
+args = ["gunicorn", "--chdir", "../..", "--bind", "0.0.0.0:5000", "app:app"]
+
+[services.production.health.startup]
+path = "/"

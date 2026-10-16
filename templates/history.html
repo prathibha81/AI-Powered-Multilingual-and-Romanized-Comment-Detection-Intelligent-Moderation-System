@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}History{% endblock %}
+{% block content %}
+<section class="page-wrap history-header">
+  <div><div class="eyebrow">Saved work</div><h1>Analysis history.</h1><p>Previous runs stay here so you can compare findings and revisit the raw comment context.</p></div>
+  <a class="button button-primary" href="{{ url_for('analyze_page') }}">New analysis <span>↗</span></a>
+</section>
+<section class="page-wrap history-list">
+  {% if analyses %}
+  {% for analysis in analyses %}
+  <article class="history-row" data-analysis-row="{{ analysis.id }}">
+    <div class="history-date"><span>{{ analysis.created_at.strftime("%d") if analysis.created_at else "--" }}</span><small>{{ analysis.created_at.strftime("%b %Y") if analysis.created_at else "" }}</small></div>
+    <div class="history-main"><div class="history-title"><a href="{{ url_for('analysis_page', analysis_id=analysis.id) }}">Analysis #{{ analysis.id }}</a>{% if analysis.is_demo %}<span class="demo-badge">DEMO</span>{% endif %}</div><p>{{ analysis.source_url }}</p></div>
+    <div class="history-metric"><span>Comments</span><strong>{{ analysis.total_comments }}</strong></div>
+    <div class="history-metric"><span>Toxicity</span><strong class="{{ 'red-number' if analysis.toxic_comments else '' }}">{{ "%.1f"|format(analysis.toxicity_percentage) }}%</strong></div>
+    <div class="history-actions"><a class="icon-action" href="{{ url_for('analysis_page', analysis_id=analysis.id) }}" title="View analysis">→</a><a class="icon-action" href="{{ url_for('export_analysis_api', analysis_id=analysis.id) }}" title="Export CSV">↓</a><button class="icon-action delete-action" data-delete-id="{{ analysis.id }}" title="Delete analysis">×</button></div>
+  </article>
+  {% endfor %}
+  {% else %}
+  <div class="empty-panel"><div class="empty-symbol">∅</div><h2>No analyses yet.</h2><p>Run your first analysis to see results here.</p><a class="button button-primary" href="{{ url_for('analyze_page') }}">Start an analysis <span>↗</span></a></div>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Analyze{% endblock %}
+{% block content %}
+<section class="hero page-wrap">
+  <div class="eyebrow"><span class="eyebrow-dot"></span> Two-class toxicity analysis</div>
+  <div class="hero-grid">
+    <div>
+      <h1>See the tone<br><em>behind the comments.</em></h1>
+      <p class="hero-copy">A focused academic workspace for turning public Instagram comments into clear, explainable toxicity signals.</p>
+      <div class="hero-actions">
+        <a class="text-link" href="#analyze-form">Start an analysis <span>↘</span></a>
+        <a class="text-link muted-link" href="{{ url_for('history_page') }}">View history <span>→</span></a>
+      </div>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <div class="signal-orbit orbit-one"></div>
+      <div class="signal-orbit orbit-two"></div>
+      <div class="signal-core"><span>AI</span><small>signal</small></div>
+      <span class="floating-chip chip-one">NON TOXIC <b>84%</b></span>
+      <span class="floating-chip chip-two">TOXIC <b>16%</b></span>
+      <span class="floating-dot dot-one"></span>
+      <span class="floating-dot dot-two"></span>
+    </div>
+  </div>
+</section>
+
+<section class="workspace page-wrap" id="analyze-form">
+  <div class="section-heading">
+    <div>
+      <div class="eyebrow">New analysis</div>
+      <h2>Bring in a post or reel.</h2>
+    </div>
+    <span class="model-pill"><span></span>{{ model_status }}</span>
+  </div>
+  <div class="analyzer-card">
+    <form id="analyze-form-element">
+      <label for="instagram-url">Instagram post or reel URL</label>
+      <div class="url-input-row">
+        <div class="input-wrap"><span class="input-prefix">instagram.com/</span><input id="instagram-url" name="url" type="url" placeholder="p/your-public-post" autocomplete="url" required></div>
+        <button class="button button-primary" type="submit"><span>Analyze comments</span><span class="button-arrow">↗</span></button>
+      </div>
+      <p class="form-note">Only analyze public content you are authorized to access. Respect platform rules and applicable laws.</p>
+      <div id="analysis-loading" class="loading-state" hidden><span class="spinner"></span><span>Collecting and analyzing comments…</span></div>
+      <div id="analysis-error" class="inline-error" role="alert" hidden></div>
+    </form>
+    <div class="or-divider"><span>or</span></div>
+    <div class="demo-row">
+      <div><strong>Explore with sample comments</strong><span>Runs the included dataset and keeps the result in your history.</span></div>
+      <button class="button button-secondary" type="button" data-demo-button>Try demo <span>↗</span></button>
+    </div>
+  </div>
+</section>
+
+<section class="feature-strip page-wrap">
+  <div><span class="feature-number">01</span><strong>Collect</strong><p>Connect a public post through the configured scraper.</p></div>
+  <div><span class="feature-number">02</span><strong>Classify</strong><p>Map each comment to NON TOXIC or TOXIC.</p></div>
+  <div><span class="feature-number">03</span><strong>Explain</strong><p>Review confidence, trends, and every comment.</p></div>
+</section>
+{% endblock %}

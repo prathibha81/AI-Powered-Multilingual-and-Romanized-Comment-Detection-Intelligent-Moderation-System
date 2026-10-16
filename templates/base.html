@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Analyze Instagram comments for toxic language with a local AI model.">
+    <title>{% block title %}Comment Signal{% endblock %} · Instagram Toxic Comment Detection</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+  </head>
+  <body>
+    <div class="site-shell">
+      <header class="site-header">
+        <a class="brand" href="{{ url_for('index') }}">
+          <span class="brand-mark" aria-hidden="true">CS</span>
+          <span>
+            <strong>Comment Signal</strong>
+            <small>Instagram toxicity lab</small>
+          </span>
+        </a>
+        <nav class="main-nav" aria-label="Primary navigation">
+          <a href="{{ url_for('index') }}">Home</a>
+          <a href="{{ url_for('analyze_page') }}">Analyze</a>
+          <a href="{{ url_for('history_page') }}">History</a>
+          <button class="nav-demo" type="button" data-demo-button>Try demo</button>
+        </nav>
+      </header>
+      <main>
+        {% block content %}{% endblock %}
+      </main>
+      <footer class="site-footer">
+        <span>Built for transparent, student-friendly moderation research.</span>
+        <span class="footer-status"><i></i> {{ "Demo mode" if mock_mode else "Apify mode" }}</span>
+      </footer>
+    </div>
+    <div id="toast-region" class="toast-region" aria-live="polite"></div>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+  </body>
+</html>

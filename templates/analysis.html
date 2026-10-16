@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Analysis #{{ analysis.id }}{% endblock %}
+{% block head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+{% endblock %}
+{% block content %}
+<section class="page-wrap detail-header">
+  <div>
+    <a class="back-link" href="{{ url_for('history_page') }}">← Back to history</a>
+    <div class="eyebrow">{{ "Demo data" if analysis.is_demo else "Completed analysis" }}</div>
+    <h1>Comment signal <span>#{{ analysis.id }}</span></h1>
+    <p class="source-line">{{ analysis.source_url }} <span>·</span> {{ analysis.created_at.strftime("%d %b %Y, %H:%M") if analysis.created_at else "" }}</p>
+  </div>
+  <a class="button button-secondary" href="{{ url_for('export_analysis_api', analysis_id=analysis.id) }}">Export CSV <span>↓</span></a>
+</section>
+
+<section class="page-wrap stats-grid">
+  <div class="stat-card"><span class="stat-label">Comments analyzed</span><strong>{{ analysis.total_comments }}</strong><span class="stat-detail">{{ analysis.total_scraped }} collected</span></div>
+  <div class="stat-card accent-stat"><span class="stat-label">Toxic comments</span><strong>{{ analysis.toxic_comments }}</strong><span class="stat-detail">{{ "%.1f"|format(analysis.toxicity_percentage) }}% of total</span></div>
+  <div class="stat-card"><span class="stat-label">Non-toxic comments</span><strong>{{ analysis.non_toxic_comments }}</strong><span class="stat-detail">Class 0 · supportive or neutral</span></div>
+  <div class="stat-card"><span class="stat-label">Average confidence</span><strong>{{ "%.0f"|format(analysis.average_confidence * 100) }}<small>%</small></strong><span class="stat-detail">Predicted class probability</span></div>
+</section>
+
+<section class="page-wrap insight-grid">
+  <div class="chart-card">
+    <div class="card-heading"><div><div class="eyebrow">Distribution</div><h2>What the signal says</h2></div><span class="legend-note">n = {{ analysis.total_comments }}</span></div>
+    <div class="chart-layout"><div class="chart-holder"><canvas id="toxicity-chart"></canvas><div class="chart-center"><strong>{{ "%.0f"|format(analysis.toxicity_percentage) }}%</strong><span>toxic</span></div></div><div class="chart-legend"><div><i class="legend-swatch toxic"></i><span>Toxic</span><strong>{{ analysis.toxic_comments }}</strong></div><div><i class="legend-swatch safe"></i><span>Non-toxic</span><strong>{{ analysis.non_toxic_comments }}</strong></div></div></div>
+    <p class="confidence-note">Model confidence represents the predicted probability associated with the selected class and should not be interpreted as certainty.</p>
+  </div>
+  <div class="method-card">
+    <div class="eyebrow">Method note</div>
+    <h2>One model, two labels.</h2>
+    <p>The classifier maps <strong>LABEL_0</strong> to NON TOXIC and <strong>LABEL_1</strong> to TOXIC. The dashboard reports the model’s highest probability for each comment.</p>
+    <div class="method-flow"><span>comment</span><b>→</b><span>tokens</span><b>→</b><span>logits</span><b>→</b><span>signal</span></div>
+  </div>
+</section>
+
+<section class="page-wrap comments-section">
+  <div class="section-heading">
+    <div><div class="eyebrow">Comment review</div><h2>Every result, in context.</h2></div>
+    <div class="comment-controls"><input id="comment-search" type="search" placeholder="Search comments…" aria-label="Search comments"><div class="filter-group" role="group" aria-label="Filter comments"><button class="filter-button active" data-filter="ALL">All</button><button class="filter-button" data-filter="TOXIC">Toxic</button><button class="filter-button" data-filter="NON TOXIC">Non-toxic</button></div></div>
+  </div>
+  <div class="table-shell"><table><thead><tr><th>Comment</th><th>Classification</th><th>Confidence</th><th>Author</th></tr></thead><tbody id="comments-body"></tbody></table><div id="comments-empty" class="empty-state" hidden>No comments match your search.</div></div>
+  <div class="pagination" id="pagination"></div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+  window.analysisData = {{ analysis_json|tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

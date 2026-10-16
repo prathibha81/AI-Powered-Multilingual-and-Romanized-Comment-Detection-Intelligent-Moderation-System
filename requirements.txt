@@ -1,0 +1,8 @@
+Flask>=3.1,<4
+Flask-SQLAlchemy>=3.1,<4
+python-dotenv>=1.2,<2
+requests>=2.32,<3
+transformers>=4.45,<5
+torch>=2.4,<3
+apify-client>=1.8,<2
+gunicorn>=23,<24
