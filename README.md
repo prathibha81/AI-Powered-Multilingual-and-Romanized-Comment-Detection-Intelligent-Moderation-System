@@ -1,162 +1,230 @@
 # Instagram Toxic Comment Detection System
 
-A Flask-based academic project for collecting publicly accessible Instagram comments, classifying them as **NON TOXIC** or **TOXIC**, and reviewing the results in a saved dashboard.
+A Flask-based web application that analyzes publicly accessible Instagram post and reel comments and classifies them as **Non-Toxic** or **Toxic**. It provides a dashboard for reviewing results, tracking previous analyses, and exporting results to CSV.
 
-## Project overview
+## Overview
 
-The application accepts an Instagram post or reel URL, retrieves comments through a mock provider or optional Apify actor, cleans the text, runs batch inference through a local Hugging Face sequence-classification model, and stores each analysis in SQLite.
+The application accepts a public Instagram post or reel URL, collects comments using either a sample dataset or an optional Apify integration, preprocesses the text, and runs batch classification through a local Hugging Face sequence-classification model. Analysis results are stored in SQLite and displayed in a dashboard.
 
-This repository did not contain a trained model when the application was created. The app therefore keeps the required model interface and uses a clearly labeled lightweight demo classifier only when `MODEL_PATH` is not available. Add the trained model directory before presenting real model results.
+> **Model note:** A trained model is not included in this repository by default. If `MODEL_PATH` is not configured, the application uses a clearly labeled demo fallback so the interface can be demonstrated. Demo predictions should not be presented as validated model results. Configure a trained model before evaluating real comments.
 
-## Features
+## Key Features
 
-- URL validation for public Instagram post and reel URLs
-- Demo mode that works without Instagram, Apify, or an API token
-- Local Hugging Face model loading with CPU/CUDA selection
-- Fixed label mapping: `LABEL_0 = NON TOXIC`, `LABEL_1 = TOXIC`
-- Batch classification with configurable batch size and max length
-- Statistics, doughnut chart, search, filters, and pagination
-- SQLite analysis history with delete and CSV export
-- Responsive HTML/CSS/vanilla JavaScript dashboard
-- Friendly error pages and API errors without stack traces or secrets
+- Validate public Instagram post and reel URLs.
+- Run the application in demo mode without external credentials.
+- Load a local Hugging Face classification model with CPU/CUDA support.
+- Classify comments using the configured two-label mapping:
+  - `LABEL_0` → `NON TOXIC`
+  - `LABEL_1` → `TOXIC`
+- Process comments in batches with configurable batch size and maximum sequence length.
+- View analysis statistics and a doughnut chart.
+- Search, filter, and paginate comment results.
+- Save analysis history in SQLite.
+- View analysis details and export results as CSV.
+- Delete saved analyses and their associated comment results.
+- Use a responsive dashboard built with HTML, CSS, JavaScript, and Chart.js.
+- Display user-friendly errors without exposing stack traces or secrets.
 
-## Architecture
-
-```text
-User → Flask → URL validation → scraper → text cleaner
-     → batch classifier → statistics → SQLite → dashboard
-```
-
-## Technology stack
-
-Python, Flask, Flask-SQLAlchemy, SQLite, Hugging Face Transformers, PyTorch, requests, optional Apify, HTML5, CSS3, vanilla JavaScript, and Chart.js via CDN.
-
-## Folder structure
+## Application Workflow
 
 ```text
-app.py                  Flask application and routes
-config.py               Environment-backed configuration
-models.py               Analysis and CommentResult database models
-services/classifier.py  Local model adapter and demo fallback
-services/scraper.py     Mock scraper and optional Apify adapter
-services/analyzer.py    End-to-end analysis pipeline
-utils/                  Text cleaning and CSV export
-templates/              Jinja pages
-static/                 CSS and vanilla JavaScript
-tests/                  Lightweight route and cleaner tests
-data/                   SQLite database (created automatically)
-model/                  Place the trained Hugging Face model here
+Instagram Post/Reel URL
+          |
+          v
+     Flask Application
+          |
+          v
+       URL Validation
+          |
+          v
+   Comment Collection
+ (Demo Dataset / Apify)
+          |
+          v
+     Text Cleaning
+          |
+          v
+  Batch Classification
+          |
+          v
+ Statistics and Results
+          |
+          v
+   SQLite + Dashboard
 ```
 
-## Installation
+## Technology Stack
 
-The Replit environment installs Python dependencies for the app. For a local machine:
+| Category | Technologies |
+|---|---|
+| Backend | Python, Flask |
+| Database | SQLite, Flask-SQLAlchemy |
+| NLP / Classification | Hugging Face Transformers, PyTorch |
+| Data collection | Sample dataset; optional Apify integration |
+| Frontend | HTML5, CSS3, JavaScript |
+| Visualization | Chart.js |
+| Testing | pytest |
+
+## Project Structure
+
+```text
+.
+├── app.py                  # Flask application and routes
+├── config.py               # Environment-based configuration
+├── models.py               # Analysis and comment-result database models
+├── services/
+│   ├── classifier.py       # Local model adapter and demo fallback
+│   ├── scraper.py          # Demo scraper and optional Apify adapter
+│   └── analyzer.py         # End-to-end analysis pipeline
+├── utils/                  # Text cleaning and CSV export utilities
+├── templates/              # Jinja HTML templates
+├── static/                 # CSS and JavaScript assets
+├── tests/                  # Route and text-cleaning tests
+├── data/                   # SQLite database, created automatically
+├── model/                  # Location for the trained model
+├── requirements.txt
+└── .env.example            # Example environment configuration
+```
+
+## Getting Started
+
+### 1. Prerequisites
+
+- Python 3.10 or a compatible version supported by the dependencies.
+- `pip`
+- A trained Hugging Face model for meaningful real-world classification. The app can also be run in demo mode without one.
+
+### 2. Clone the repository
 
 ```bash
-python -m pip install -r requirements.txt
+git clone <YOUR_GITHUB_REPOSITORY_URL>
+cd <YOUR_REPOSITORY_FOLDER>
 ```
 
-For a virtual environment:
+Replace the placeholders with your repository URL and folder name.
+
+### 3. Create and activate a virtual environment
+
+**Windows**
 
 ```bash
 python -m venv .venv
-# Windows
 .venv\Scripts\activate
-# Linux/macOS
+```
+
+**Linux / macOS**
+
+```bash
+python3 -m venv .venv
 source .venv/bin/activate
+```
+
+### 4. Install dependencies
+
+```bash
 python -m pip install -r requirements.txt
 ```
 
-## Model setup
+### 5. Configure environment variables
 
-Set `MODEL_PATH` to the directory containing the existing trained model. It should include `config.json`, tokenizer files, and model weights such as `model.safetensors`. The application loads the model once and never reverses the required label mapping.
+Use `.env.example` as a reference and configure the values required by your environment. Avoid committing secrets or real API tokens to version control.
 
-The model must actually support two labels. The app does not claim multilingual support or create unsupported toxicity categories.
+Common configuration variables include:
 
-## Apify setup
+| Variable | Purpose |
+|---|---|
+| `MODEL_PATH` | Path to the trained Hugging Face model directory |
+| `DATABASE_URL` | Database connection URL |
+| `MOCK_SCRAPER` | Enables or disables demo comment collection |
+| `MAX_COMMENTS` | Maximum number of comments to process |
+| `BATCH_SIZE` | Number of comments processed per batch |
+| `MAX_LENGTH` | Maximum token sequence length |
+| `APIFY_API_TOKEN` | Server-side token for optional Apify integration |
+| `APIFY_ACTOR_ID` | Apify actor identifier |
+| `SECRET_KEY` | Flask application secret key |
 
-For live public-comment scraping, set `MOCK_SCRAPER=false`, set `APIFY_API_TOKEN` securely, and configure `APIFY_ACTOR_ID` if your actor uses a different ID. The token is read only on the server and is never put into HTML or JavaScript.
+## Model Configuration
 
-Do not implement private-account access or authentication bypass. Use only content you are authorized to analyze and follow Instagram, Apify, and applicable legal rules.
+Set `MODEL_PATH` to a directory containing a compatible trained Hugging Face sequence-classification model, including its configuration, tokenizer files, and model weights (for example, `model.safetensors`).
 
-## Mock and demo modes
+The configured model must support the application's two-class label mapping. Confirm that the model's training labels match the expected mapping before interpreting predictions.
 
-`MOCK_SCRAPER=true` uses the included sample comments. The **Try demo** button always uses that dataset and stores the result with a DEMO label. If no trained model is present, the demo uses the transparent local fallback so the interface remains demonstrable; that fallback is not a substitute for model evaluation.
+The demo fallback is intended for interface demonstration only. It is not a replacement for a trained model, validation, or performance evaluation.
 
-## Running Flask
+## Comment Collection Configuration
+
+The application supports a sample dataset for demo use and an optional Apify integration for collecting publicly accessible comments.
+
+To configure live collection:
+
+1. Set `MOCK_SCRAPER=false`.
+2. Set `APIFY_API_TOKEN` as a server-side environment variable.
+3. Set `APIFY_ACTOR_ID` if your Apify actor uses a different identifier.
+4. Verify that your account, actor, and intended use are permitted.
+
+Do not attempt to access private accounts or bypass authentication. Collect and analyze only content you are authorized to process, and follow Instagram's terms, Apify's terms, and applicable laws.
+
+## Run the Application
 
 ```bash
 python app.py
 ```
 
-The app listens on `0.0.0.0:$PORT` when `PORT` is supplied, or port 5000 locally.
+Open the local address shown in the terminal. By default, the application uses port `5000`; when a `PORT` environment variable is supplied, it can listen on that port.
 
-For production, use a WSGI server only after configuring the environment:
+For a WSGI deployment, configure the environment and use a production server such as:
 
 ```bash
 gunicorn app:app
 ```
 
-Hosting limits and pricing can change by provider.
+Deployment requirements and hosting costs depend on the chosen provider.
 
-## Environment variables
+## API Endpoints
 
-See `.env.example`. Important values are:
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/` | Homepage |
+| `POST` | `/api/analyze` | Collect and analyze comments from a URL |
+| `POST` | `/api/demo` | Analyze the included demo comments |
+| `GET` | `/analysis/<id>` | View analysis details |
+| `GET` | `/history` | View saved analyses |
+| `GET` | `/api/history` | Retrieve analysis history as JSON |
+| `GET` | `/api/analysis/<id>` | Retrieve a specific analysis as JSON |
+| `DELETE` | `/api/analysis/<id>` | Delete an analysis |
+| `GET` | `/api/analysis/<id>/export` | Export analysis results as CSV |
 
-- `MODEL_PATH`
-- `DATABASE_URL`
-- `MOCK_SCRAPER`
-- `MAX_COMMENTS`
-- `BATCH_SIZE`
-- `MAX_LENGTH`
-- `APIFY_API_TOKEN`
-- `APIFY_ACTOR_ID`
-- `SECRET_KEY`
+## Run Tests
 
-## API endpoints
-
-| Method | Endpoint | Purpose |
-| --- | --- | --- |
-| GET | `/` | Homepage |
-| POST | `/api/analyze` | Scrape and analyze a URL |
-| POST | `/api/demo` | Analyze included demo comments |
-| GET | `/analysis/<id>` | Detail page |
-| GET | `/history` | Saved analyses |
-| GET | `/api/history` | History JSON |
-| GET | `/api/analysis/<id>` | Analysis JSON |
-| DELETE | `/api/analysis/<id>` | Delete analysis |
-| GET | `/api/analysis/<id>/export` | Download CSV |
-
-## Testing
+Run the test suite from the project root:
 
 ```bash
 python -m pytest
 ```
 
-The tests cover text cleaning, homepage loading, demo persistence, history/detail routes, CSV availability, and invalid URL handling. Add the trained model before running model-specific inference checks.
+The included tests cover text cleaning, homepage loading, demo result persistence, history and detail routes, CSV export availability, and invalid URL handling. Model-specific evaluation should be performed separately with a trained model and an appropriately labeled test dataset.
 
-## Database
+## Data Storage
 
-SQLite and its `data/` directory are created automatically at startup. Each `Analysis` owns many `CommentResult` records. Deleting an analysis deletes its associated results.
+The application creates its SQLite database and `data/` directory automatically at startup. Each analysis record is associated with its comment-result records. Deleting an analysis also deletes its associated results.
 
-## Viva explanation
+## Limitations
 
-- **Flask** handles routes, requests, responses, and templates.
-- **Tokenizer** converts text into the numbers the Transformer expects.
-- **Transformer** generates a representation of the comment.
-- **Logits** are the model’s raw class scores.
-- **Softmax** turns those scores into probability-like values.
-- **Classification** selects the higher probability and maps class 0/class 1 to the two supported labels.
-- **SQLite** stores history and individual predictions.
-- **Apify** is an optional provider for public comment collection.
+- Toxicity predictions may be incorrect, especially for sarcasm, context-dependent language, spelling variations, and underrepresented languages.
+- Results depend on the quality and suitability of the configured model and its training data.
+- Confidence scores should not be treated as certainty.
+- The demo fallback is not a validated toxicity detection model.
+- Multilingual support should not be assumed unless the selected model has been trained and evaluated for the relevant languages.
+- Automated classification should support, not replace, appropriate human review in consequential moderation decisions.
 
-## Limitations and ethics
+## Future Enhancements
 
-Predictions can be wrong. Sarcasm, context, language variation, and bias in training data affect performance. Confidence is not certainty, and automated classification is not perfect moderation. The app does not implement private-account access or authentication bypass. Users should analyze only authorized public content and respect platform rules and applicable laws.
+- Add user authentication and per-user analysis history.
+- Include model evaluation metrics and a labeled review workflow.
+- Add background processing for large comment collections.
+- Support additional permitted public data providers through modular adapters.
+- Improve monitoring, logging, and deployment configuration.
 
-## Future improvements
+## Responsible Use
 
-- Add authenticated users and per-user history
-- Add model evaluation metrics and a labeled review workflow
-- Add background jobs for very large comment sets
-- Add a provider adapter for additional permitted public data sources
+This project is intended for educational and research purposes. Use it responsibly, respect platform policies and privacy, and ensure that any collection or analysis of comments is legally and ethically appropriate.
